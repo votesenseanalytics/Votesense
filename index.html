@@ -73,6 +73,10 @@
       background-color: #f0f0f0;
       font-weight: bold;
     }
+    #sheet-selection {
+      text-align: center;
+      margin-top: 15px;
+    }
   </style>
 </head>
 <body>
@@ -82,7 +86,7 @@
     
     <!-- Founder Section -->
     <div class="founder-container">
-      <img src="data/founder.jpg" alt="Founder Photo">
+      <img src="founder.jpg" alt="Founder Photo">
       <p class="founder-name">Founder: Balaji Mohan</p>
     </div>
   </header>
@@ -110,6 +114,9 @@
     <button onclick="loadExcel()">View Report</button>
   </div>
 
+  <!-- Radio buttons for sheet selection -->
+  <div id="sheet-selection"></div>
+
   <div class="table-container" id="table-container">
     <p>Select options above and click "View Report".</p>
   </div>
@@ -128,16 +135,43 @@
         })
         .then(data => {
           const workbook = XLSX.read(data, { type: "array" });
-          showSheet(workbook);
+          createSheetSelection(workbook);
         })
         .catch(err => {
           document.getElementById("table-container").innerHTML = `<p style='color:red;'>Error loading file: ${err.message}</p>`;
         });
     }
 
-    function showSheet(workbook) {
-      const firstSheet = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheet];
+    function createSheetSelection(workbook) {
+      const sheetContainer = document.getElementById("sheet-selection");
+      sheetContainer.innerHTML = ""; // Clear previous selections
+
+      workbook.SheetNames.forEach((sheetName, index) => {
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "sheet";
+        radio.value = sheetName;
+        radio.id = `sheet-${index}`;
+        radio.onclick = () => showSheet(workbook, sheetName);
+
+        const label = document.createElement("label");
+        label.htmlFor = `sheet-${index}`;
+        label.textContent = sheetName;
+
+        sheetContainer.appendChild(radio);
+        sheetContainer.appendChild(label);
+        sheetContainer.appendChild(document.createElement("br"));
+      });
+
+      // Automatically load the first sheet
+      if (workbook.SheetNames.length > 0) {
+        showSheet(workbook, workbook.SheetNames[0]);
+        document.getElementById("sheet-0").checked = true;
+      }
+    }
+
+    function showSheet(workbook, sheetName) {
+      const worksheet = workbook.Sheets[sheetName];
       const html = XLSX.utils.sheet_to_html(worksheet, { editable: false, header: "<th>" });
       document.getElementById("table-container").innerHTML = html;
     }
