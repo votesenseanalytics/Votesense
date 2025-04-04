@@ -1,35 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Votesense Analytics - Dashboard</title>
-
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
   <style>
     body {
       font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
       background: #f4f4f4;
-      padding: 20px;
     }
     header {
       background: #002366;
       color: white;
-      text-align: center;
       padding: 20px;
+      text-align: center;
       border-radius: 10px;
     }
-    .radio-container {
+    .founder-container {
       display: flex;
-      flex-wrap: wrap;
-      margin-top: 20px;
-      gap: 20px;
-      padding: 10px;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      margin-top: 10px;
     }
-    .radio-container label {
-      margin-right: 20px;
+    .founder-container img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+    }
+    .founder-name {
+      font-size: 18px;
       font-weight: bold;
+      margin-top: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    .dropdowns {
+      text-align: center;
+      margin-top: 20px;
+    }
+    select, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+      border-radius: 5px;
     }
     .table-container {
       margin-top: 20px;
@@ -39,13 +59,9 @@
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
-    /* Styling table based on Excel theme */
     table {
       width: 100%;
       border-collapse: collapse;
-      font-family: Calibri, sans-serif;
-      font-size: 14px;
     }
     th, td {
       border: 1px solid #ccc;
@@ -53,28 +69,84 @@
       text-align: left;
     }
     th {
-      background-color: #dbe5f1;
+      background-color: #f0f0f0;
       font-weight: bold;
+    }
+    #sheet-selection {
+      text-align: center;
+      margin-top: 15px;
+    }
+    /* New row-wise radio button styling */
+    .radio-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 10px;
+    }
+    .radio-container label {
+      background: #002366;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .radio-container input {
+      display: none;
+    }
+    .radio-container input:checked + label {
+      background: #0056b3;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>TN-PEPW</h1>
+    <h1>Tamil Nadu Political Empowerment and People Welfare (TNPPEPW)</h1>
     <h2>Votesense Analytics Dashboard</h2>
+    
+    <!-- Founder Section -->
+    <div class="founder-container">
+      <img src="founder.jpg" alt="Founder Photo">
+      <p class="founder-name">Founder: Balaji Mohan</p>
+    </div>
   </header>
 
-  <div class="radio-container" id="sheet-radio-buttons">
-    <!-- Radio buttons for sheets will appear here -->
+  <div class="dropdowns">
+    <label for="year">Select Year:</label>
+    <select id="year">
+      <option value="2024">2024</option>
+      <option value="2021">2021</option>
+    </select>
+
+    <label for="type">Election Type:</label>
+    <select id="type">
+      <option value="Assembly Election">Assembly Election</option>
+      <option value="Parliament Election">Parliament Election</option>
+    </select>
+
+    <label for="constituency">Constituency:</label>
+    <select id="constituency">
+      <option value="Dharmapuri">Dharmapuri</option>
+      <option value="Salem">Salem</option>
+      <option value="Chennai South">Chennai South</option>
+    </select>
+
+    <button onclick="loadExcel()">View Report</button>
   </div>
 
+  <!-- Radio buttons for sheet selection in a row -->
+  <div id="sheet-selection" class="radio-container"></div>
+
   <div class="table-container" id="table-container">
-    <p>Select a sheet to view data.</p>
+    <p>Select options above and click "View Report".</p>
   </div>
 
   <script>
     function loadExcel() {
-      const filePath = "data/sample.xlsx"; // Modify this if using a different path
+      const year = document.getElementById("year").value;
+      const type = document.getElementById("type").value;
+      const constituency = document.getElementById("constituency").value;
+      const filePath = `data/${year}_${type}_${constituency}.xlsx`;
 
       fetch(filePath)
         .then(response => {
@@ -83,53 +155,45 @@
         })
         .then(data => {
           const workbook = XLSX.read(data, { type: "array" });
-          displaySheetOptions(workbook);
+          createSheetSelection(workbook);
         })
         .catch(err => {
-          document.getElementById("table-container").innerHTML =
-            `<p style='color:red;'>Error loading file: ${err.message}</p>`;
+          document.getElementById("table-container").innerHTML = `<p style='color:red;'>Error loading file: ${err.message}</p>`;
         });
     }
 
-    function displaySheetOptions(workbook) {
-      const radioContainer = document.getElementById("sheet-radio-buttons");
-      radioContainer.innerHTML = "";
+    function createSheetSelection(workbook) {
+      const sheetContainer = document.getElementById("sheet-selection");
+      sheetContainer.innerHTML = ""; // Clear previous selections
 
       workbook.SheetNames.forEach((sheetName, index) => {
         const radio = document.createElement("input");
         radio.type = "radio";
         radio.name = "sheet";
         radio.value = sheetName;
-        radio.id = `sheet${index}`;
+        radio.id = `sheet-${index}`;
         radio.onclick = () => showSheet(workbook, sheetName);
 
         const label = document.createElement("label");
-        label.htmlFor = `sheet${index}`;
-        label.innerText = sheetName;
+        label.htmlFor = `sheet-${index}`;
+        label.textContent = sheetName;
 
-        radioContainer.appendChild(radio);
-        radioContainer.appendChild(label);
+        sheetContainer.appendChild(radio);
+        sheetContainer.appendChild(label);
       });
+
+      // Automatically load the first sheet
+      if (workbook.SheetNames.length > 0) {
+        showSheet(workbook, workbook.SheetNames[0]);
+        document.getElementById("sheet-0").checked = true;
+      }
     }
 
     function showSheet(workbook, sheetName) {
       const worksheet = workbook.Sheets[sheetName];
-      if (!worksheet) {
-        document.getElementById("table-container").innerHTML =
-          `<p style='color:red;'>No data found in the selected sheet.</p>`;
-        return;
-      }
-
-      try {
-        const html = XLSX.utils.sheet_to_html(worksheet, { editable: false });
-        document.getElementById("table-container").innerHTML = html;
-      } catch (err) {
-        document.getElementById("table-container").innerHTML =
-          `<p style='color:red;'>Error parsing sheet: ${err.message}</p>`;
-      }
+      const html = XLSX.utils.sheet_to_html(worksheet, { editable: false, header: "<th>" });
+      document.getElementById("table-container").innerHTML = html;
     }
-
-    loadExcel();
   </script>
 </body>
 </html>
