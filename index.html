@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Votesense Analytics - Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
@@ -50,6 +50,7 @@
       margin: 10px;
       font-size: 16px;
       border-radius: 5px;
+      cursor: pointer;
     }
     .table-container {
       margin-top: 20px;
@@ -76,7 +77,6 @@
       text-align: center;
       margin-top: 15px;
     }
-    /* New row-wise radio button styling */
     .radio-container {
       display: flex;
       justify-content: center;
@@ -103,10 +103,9 @@
   <header>
     <h1>Tamil Nadu Political Empowerment and People Welfare (TN-PEPW)</h1>
     <h2>Votesense Analytics Dashboard</h2>
-    
-    <!-- Founder Section -->
+
     <div class="founder-container">
-      <img src="founder.jpg" alt="Founder Photo">
+      <img src="founder.jpg" alt="Founder Photo" />
       <p class="founder-name">Founder: Balaji Mohan</p>
     </div>
   </header>
@@ -135,9 +134,10 @@
     </select>
 
     <button onclick="loadExcel()">View Report</button>
+    <button onclick="loadMasterData()">Master Data</button>
+    <button onclick="goHome()">Home</button>
   </div>
 
-  <!-- Radio buttons for sheet selection in a row -->
   <div id="sheet-selection" class="radio-container"></div>
 
   <div class="table-container" id="table-container">
@@ -151,6 +151,15 @@
       const constituency = document.getElementById("constituency").value;
       const filePath = `data/${year}_${type}_${constituency}.xlsx`;
 
+      fetchAndRenderExcel(filePath);
+    }
+
+    function loadMasterData() {
+      const filePath = `data/Master_Data.xlsx`;
+      fetchAndRenderExcel(filePath);
+    }
+
+    function fetchAndRenderExcel(filePath) {
       fetch(filePath)
         .then(response => {
           if (!response.ok) throw new Error("File not found");
@@ -162,12 +171,13 @@
         })
         .catch(err => {
           document.getElementById("table-container").innerHTML = `<p style='color:red;'>Error loading file: ${err.message}</p>`;
+          document.getElementById("sheet-selection").innerHTML = "";
         });
     }
 
     function createSheetSelection(workbook) {
       const sheetContainer = document.getElementById("sheet-selection");
-      sheetContainer.innerHTML = ""; // Clear previous selections
+      sheetContainer.innerHTML = "";
 
       workbook.SheetNames.forEach((sheetName, index) => {
         const radio = document.createElement("input");
@@ -185,7 +195,6 @@
         sheetContainer.appendChild(label);
       });
 
-      // Automatically load the first sheet
       if (workbook.SheetNames.length > 0) {
         showSheet(workbook, workbook.SheetNames[0]);
         document.getElementById("sheet-0").checked = true;
@@ -196,6 +205,10 @@
       const worksheet = workbook.Sheets[sheetName];
       const html = XLSX.utils.sheet_to_html(worksheet, { editable: false, header: "<th>" });
       document.getElementById("table-container").innerHTML = html;
+    }
+
+    function goHome() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   </script>
 </body>
