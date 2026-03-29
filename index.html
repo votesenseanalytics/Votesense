@@ -1,215 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Votesense Analytics - Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Votesense Analytics - Strategic Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f4f4;
-    }
-    header {
-      background: #002366;
-      color: white;
-      padding: 20px;
-      text-align: center;
-      border-radius: 10px;
-    }
-    .founder-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      margin-top: 10px;
-    }
-    .founder-container img {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: 3px solid white;
-      box-shadow: 0 0 8px rgba(0,0,0,0.3);
-    }
-    .founder-name {
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: 8px;
-      background: rgba(255, 255, 255, 0.2);
-      padding: 5px 10px;
-      border-radius: 5px;
-    }
-    .dropdowns {
-      text-align: center;
-      margin-top: 20px;
-    }
-    select, button {
-      padding: 10px;
-      margin: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .table-container {
-      margin-top: 20px;
-      overflow-x: auto;
-      background: white;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background-color: #f0f0f0;
-      font-weight: bold;
-    }
-    #sheet-selection {
-      text-align: center;
-      margin-top: 15px;
-    }
-    .radio-container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin-top: 10px;
-    }
-    .radio-container label {
-      background: #002366;
-      color: white;
-      padding: 8px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .radio-container input {
-      display: none;
-    }
-    .radio-container input:checked + label {
-      background: #0056b3;
-    }
+    :root { --primary: #002366; --secondary: #0056b3; --bg: #f4f7f6; --text: #1e293b; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+    header { background: var(--primary); color: white; padding: 30px; text-align: center; border-bottom: 5px solid var(--secondary); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .founder-container img { width: 110px; height: 110px; border-radius: 50%; border: 3px solid white; margin-bottom: 10px; }
+    .founder-name { font-size: 1.1rem; font-weight: bold; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; }
+    
+    .controls { background: white; padding: 25px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    select, button, input { padding: 12px; margin: 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 15px; outline: none; }
+    button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: 600; transition: 0.3s; padding: 12px 25px; }
+    button:hover { background: var(--secondary); transform: translateY(-2px); }
+    
+    #searchBox { width: 70%; max-width: 600px; display: none; margin: 15px auto; border: 2px solid var(--primary); }
+
+    .radio-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; padding: 20px; }
+    .radio-container label { background: #e2e8f0; color: #475569; padding: 10px 18px; border-radius: 25px; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 14px; }
+    .radio-container input { display: none; }
+    .radio-container input:checked + label { background: var(--primary); color: white; box-shadow: 0 4px 8px rgba(0,35,102,0.3); }
+
+    .table-container { margin: 20px auto; width: 96%; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 800px; }
+    th { background: #f8fafc; color: var(--primary); padding: 15px; border: 1px solid #e2e8f0; text-align: left; position: sticky; top: 0; }
+    td { padding: 12px; border: 1px solid #e2e8f0; }
+    tr:nth-child(even) { background: #f8fafc; }
+    tr:hover { background: #f1f5f9; }
+    
+    .loading { text-align: center; font-weight: bold; color: var(--primary); display: none; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Tamil Nadu Political Empowerment and People Welfare (TN-PEPW)</h1>
-    <h2>Votesense Analytics Dashboard</h2>
 
-    <div class="founder-container">
-      <img src="founder.jpg" alt="Founder Photo" />
-      <p class="founder-name">Founder: Balaji Mohan</p>
-    </div>
-  </header>
-
-  <div class="dropdowns">
-    <label for="year">Select Year:</label>
-    <select id="year">
-      <option value="2016">2016</option>
-      <option value="2021">2021</option>
-      <option value="2024">2024</option>
-    </select>
-
-    <label for="type">Election Type:</label>
-    <select id="type">
-      <option value="Assembly Election">Assembly Election</option>
-      <option value="Parliament Election">Parliament Election</option>
-    </select>
-
-    <label for="constituency">Constituency:</label>
-    <select id="constituency">
-      <option value="Dharmapuri">Dharmapuri</option>
-      <option value="Salem(North)">Salem(North)</option>
-      <option value="Palacode">Palacode</option>
-      <option value="Singanallur">Singanallur</option>
-      <option value="Thondamuthur">Thondamuthur</option>
-    </select>
-
-    <button onclick="loadExcel()">View Report</button>
-    <button onclick="loadMasterData()">Master Data</button>
-    <button onclick="goHome()">Home</button>
+<header>
+  <h1>Tamil Nadu Political Empowerment and People Welfare (TN-PEPW)</h1>
+  <div class="founder-container">
+    <img src="founder.jpg" alt="Founder">
+    <div class="founder-name">Founder: Balaji Mohan</div>
   </div>
+</header>
 
-  <div id="sheet-selection" class="radio-container"></div>
+<div class="controls">
+  <select id="year">
+    <option value="2021">2021</option>
+    <option value="2016">2016</option>
+    <option value="2024">2024</option>
+  </select>
 
-  <div class="table-container" id="table-container">
-    <p>Select options above and click "View Report".</p>
-  </div>
+  <select id="type">
+    <option value="Assembly Election">Assembly Election</option>
+    <option value="Parliament Election">Parliament Election</option>
+  </select>
 
-  <script>
-    function loadExcel() {
-      const year = document.getElementById("year").value;
-      const type = document.getElementById("type").value;
-      const constituency = document.getElementById("constituency").value;
-      const filePath = `data/${year}_${type}_${constituency}.xlsx`;
+  <select id="constituency">
+    <option value="Pappireddipatti">Pappireddipatti</option>
+    <option value="Dharmapuri">Dharmapuri</option>
+    <option value="Salem(North)">Salem(North)</option>
+    <option value="Palacode">Palacode</option>
+  </select>
 
-      fetchAndRenderExcel(filePath);
-    }
+  <button onclick="loadDashboard()">View Report</button>
+  <button onclick="location.reload()" style="background:#64748b;">Reset</button>
+  <br>
+  <input type="text" id="searchBox" onkeyup="searchTable()" placeholder="🔍 Search Polling Station, Building, or Village...">
+</div>
 
-    function loadMasterData() {
-      const filePath = `data/Master_Data.xlsx`;
-      fetchAndRenderExcel(filePath);
-    }
+<div id="tab-container" class="radio-container"></div>
+<div id="loading-spinner" class="loading">Processing Data... Please Wait...</div>
 
-    function fetchAndRenderExcel(filePath) {
-      fetch(filePath)
-        .then(response => {
-          if (!response.ok) throw new Error("File not found");
-          return response.arrayBuffer();
-        })
-        .then(data => {
-          const workbook = XLSX.read(data, { type: "array" });
-          createSheetSelection(workbook);
-        })
-        .catch(err => {
-          document.getElementById("table-container").innerHTML = `<p style='color:red;'>Error loading file: ${err.message}</p>`;
-          document.getElementById("sheet-selection").innerHTML = "";
-        });
-    }
+<div class="table-container" id="display-area">
+  <p style="text-align:center; color:#94a3b8;">Choose your criteria and click "View Report" to load the AIADMK Strategic Insights.</p>
+</div>
 
-    function createSheetSelection(workbook) {
-      const sheetContainer = document.getElementById("sheet-selection");
-      sheetContainer.innerHTML = "";
+<script>
+  let activeWorkbook = null;
 
-      workbook.SheetNames.forEach((sheetName, index) => {
-        const radio = document.createElement("input");
-        radio.type = "radio";
-        radio.name = "sheet";
-        radio.value = sheetName;
-        radio.id = `sheet-${index}`;
-        radio.onclick = () => showSheet(workbook, sheetName);
+  function loadDashboard() {
+    const year = document.getElementById("year").value;
+    const type = document.getElementById("type").value;
+    const consti = document.getElementById("constituency").value;
+    
+    // Exact path to the file you generated: data/2021_Assembly Election_Pappireddipatti.xlsx
+    const path = `data/${year}_${type}_${consti}.xlsx`;
+    
+    document.getElementById("loading-spinner").style.display = "block";
+    document.getElementById("display-area").innerHTML = "";
 
-        const label = document.createElement("label");
-        label.htmlFor = `sheet-${index}`;
-        label.textContent = sheetName;
-
-        sheetContainer.appendChild(radio);
-        sheetContainer.appendChild(label);
+    fetch(path)
+      .then(res => {
+        if (!res.ok) throw new Error("File not found. Please check data/ folder.");
+        return res.arrayBuffer();
+      })
+      .then(buffer => {
+        activeWorkbook = XLSX.read(buffer, { type: "array" });
+        createTabs(activeWorkbook);
+        document.getElementById("searchBox").style.display = "block";
+        document.getElementById("loading-spinner").style.display = "none";
+      })
+      .catch(err => {
+        document.getElementById("loading-spinner").style.display = "none";
+        document.getElementById("display-area").innerHTML = `<p style="color:red; text-align:center;">Error: ${err.message}</p>`;
       });
+  }
 
-      if (workbook.SheetNames.length > 0) {
-        showSheet(workbook, workbook.SheetNames[0]);
-        document.getElementById("sheet-0").checked = true;
-      }
-    }
+  function createTabs(wb) {
+    const container = document.getElementById("tab-container");
+    container.innerHTML = "";
+    
+    wb.SheetNames.forEach((name, i) => {
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "sheet-tab";
+      radio.id = `tab-${i}`;
+      radio.checked = i === 0;
+      radio.onclick = () => renderSheet(name);
+      
+      const label = document.createElement("label");
+      label.htmlFor = `tab-${i}`;
+      label.textContent = name;
+      
+      container.appendChild(radio);
+      container.appendChild(label);
+    });
+    
+    renderSheet(wb.SheetNames[0]);
+  }
 
-    function showSheet(workbook, sheetName) {
-      const worksheet = workbook.Sheets[sheetName];
-      const html = XLSX.utils.sheet_to_html(worksheet, { editable: false, header: "<th>" });
-      document.getElementById("table-container").innerHTML = html;
-    }
+  function renderSheet(name) {
+    const ws = activeWorkbook.Sheets[name];
+    const html = XLSX.utils.sheet_to_html(ws, { header: "<th>", editable: false });
+    document.getElementById("display-area").innerHTML = html;
+    // Add styling classes to the generated table
+    const table = document.querySelector("table");
+    if(table) table.id = "mainTable";
+  }
 
-    function goHome() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  </script>
+  function searchTable() {
+    const query = document.getElementById("searchBox").value.toLowerCase();
+    const rows = document.querySelectorAll("#mainTable tr");
+    
+    rows.forEach((row, i) => {
+      if (i === 0) return; // Skip header
+      row.style.display = row.innerText.toLowerCase().includes(query) ? "" : "none";
+    });
+  }
+</script>
+
 </body>
 </html>
