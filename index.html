@@ -3,82 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Votesense Analytics | Premium Dashboard</title>
+  <title>Votesense | Strategic Intelligence Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root { 
-      --aiadmk-green: #008444; --dmk-red: #ed1c24; --primary: #002366; 
-      --bg: #f8fafc; --card: #ffffff; --header-text: #ffffff;
-    }
-    body { font-family: 'Inter', system-ui, sans-serif; margin: 0; background: var(--bg); color: #1e293b; }
-    
-    /* Premium Header */
-    header { 
-      background: linear-gradient(135deg, var(--primary) 0%, #004aad 100%); 
-      color: white; padding: 40px 20px; text-align: center; border-bottom: 6px solid var(--aiadmk-green);
-    }
+    :root { --aiadmk: #008444; --dmk: #ed1c24; --primary: #002366; --bg: #f8fafc; }
+    body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color: #1e293b; }
+    header { background: linear-gradient(135deg, var(--primary) 0%, #004aad 100%); color: white; padding: 40px 20px; text-align: center; border-bottom: 6px solid var(--aiadmk); }
     .founder-img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-    
-    /* Sidebar-style Controls */
-    .controls { background: var(--card); padding: 25px; margin: -30px 20px 20px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-    select, button, input { padding: 12px 18px; margin: 8px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: 0.3s; }
+    .controls { background: white; padding: 25px; margin: -30px 20px 20px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+    select, button, input { padding: 12px 18px; margin: 8px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; }
     button { background: var(--primary); color: white; border: none; font-weight: 700; cursor: pointer; }
-    button:hover { background: var(--secondary); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,35,102,0.2); }
-    
-    /* Search Box */
     #searchBox { width: 60%; border: 2px solid var(--primary); font-size: 16px; }
-
-    /* Modern Tabs */
     .radio-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 20px; }
-    .radio-container label { background: #fff; border: 1px solid #cbd5e1; color: #64748b; padding: 12px 24px; border-radius: 30px; cursor: pointer; font-weight: 600; }
-    .radio-container input:checked + label { background: var(--primary); color: white; border-color: var(--primary); }
-
-    /* Insight Cards */
-    .insight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
-    .card { background: white; padding: 25px; border-radius: 15px; border-top: 5px solid var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .card h3 { margin-top: 0; color: var(--primary); font-size: 1.1rem; }
-    .stat { font-size: 2rem; font-weight: 800; margin: 10px 0; color: #0f172a; }
-    .percent { color: var(--aiadmk-green); font-weight: 700; }
-
-    /* Styled Data Table */
+    .radio-container label { background: #fff; border: 1px solid #cbd5e1; color: #64748b; padding: 12px 24px; border-radius: 30px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .radio-container input:checked + label { background: var(--primary); color: white; box-shadow: 0 4px 8px rgba(0,35,102,0.3); }
     .table-container { margin: 20px; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    table { width: 100%; border-collapse: collapse; }
-    th { background: var(--primary); color: white; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; padding: 18px; text-align: left; }
-    td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-    tr:hover { background: #f8fafc; }
+    table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+    th { background: var(--primary); color: white; font-size: 13px; padding: 18px; text-align: left; font-weight: 800; border: 1px solid #ffffff33; text-transform: uppercase; }
+    td { padding: 15px; border: 1px solid #f1f5f9; font-size: 14px; vertical-align: top; }
+    .bold-col { font-weight: 900; color: #0f172a; background: #f1f5f9; border-left: 2px solid #cbd5e1; border-right: 2px solid #cbd5e1; }
+    .ps-header { background: #004aad !important; }
     .win-tag { padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 11px; }
-    .win-AIADMK { background: #dcfce7; color: #166534; }
-    .win-DMK { background: #fee2e2; color: #991b1b; }
+    .win-AIADMK { background: #dcfce7; color: #166534; } .win-DMK { background: #fee2e2; color: #991b1b; }
+    .candidate-sub { font-size: 10px; display: block; color: #cbd5e1; margin-top: 4px; font-weight: 400; }
   </style>
 </head>
 <body>
-
 <header>
   <img src="founder.jpg" class="founder-img" alt="Founder">
   <h1>Votesense Strategic Dashboard</h1>
-  <p>Political Intelligence for Tamil Nadu Empowerment</p>
+  <p>Political Intelligence & Booth-Level Analysis</p>
 </header>
-
 <div class="controls">
   <select id="year"><option value="2021">2021 Election</option></select>
   <select id="type"><option value="Assembly Election">Assembly Election</option></select>
   <select id="constituency"><option value="Pappireddipatti">Pappireddipatti</option></select>
   <button onclick="loadDashboard()">GENERATE REPORT</button>
-  <input type="text" id="searchBox" onkeyup="searchTable()" placeholder="🔍 Quick Search Booth or Area...">
+  <input type="text" id="searchBox" onkeyup="searchTable()" placeholder="🔍 Search PS No, Village, or Candidate...">
 </div>
-
 <div id="tab-container" class="radio-container"></div>
-
-<div id="dashboard-content">
-  <div class="table-container" id="display-area">
-    <p style="text-align:center; padding: 50px; color:#94a3b8;">Welcome, Balaji. Select parameters above to begin the 2021 Strategic Analysis.</p>
-  </div>
-</div>
-
+<div id="display-area" class="table-container"></div>
 <script>
   let activeWorkbook = null;
-
   function loadDashboard() {
     const path = `data/2021_Assembly Election_Pappireddipatti.xlsx`;
     fetch(path).then(res => res.arrayBuffer()).then(buffer => {
@@ -86,7 +53,6 @@
       createTabs(activeWorkbook);
     });
   }
-
   function createTabs(wb) {
     const container = document.getElementById("tab-container");
     container.innerHTML = "";
@@ -101,66 +67,36 @@
     });
     renderSheet(wb.SheetNames[0]);
   }
-
   function renderSheet(name) {
     const ws = activeWorkbook.Sheets[name];
     const displayArea = document.getElementById("display-area");
-    
-    if (name.includes("Insights")) {
-      renderInsightCards(ws);
-    } else {
-      let html = XLSX.utils.sheet_to_html(ws, { header: "<th>" });
-      displayArea.innerHTML = html;
-      styleTableTags();
+    const data = XLSX.utils.sheet_to_json(ws, {header: 1});
+    if (data.length === 0) return;
+    let html = "<table><thead><tr>";
+    data[0].forEach((cell, idx) => {
+      let title = cell || "";
+      let extraClass = (idx === 0) ? 'class="ps-header"' : '';
+      if(title === "AIADMK") title += '<span class="candidate-sub">A. Govindasamy</span>';
+      if(title === "DMK") title += '<span class="candidate-sub">M. Prabhu Rajkumar</span>';
+      html += `<th ${extraClass}>${title}</th>`;
+    });
+    html += "</tr></thead><tbody>";
+    for(let i=1; i<data.length; i++) {
+      html += "<tr>";
+      data[i].forEach((cell, j) => {
+        let className = (j === 0 || j === 2 || j === 3) ? 'class="bold-col"' : '';
+        let val = cell || "";
+        if(val === "AIADMK") val = '<span class="win-tag win-AIADMK">AIADMK</span>';
+        if(val === "DMK") val = '<span class="win-tag win-DMK">DMK</span>';
+        html += `<td ${className}>${val}</td>`;
+      });
+      html += "</tr>";
     }
-  }
-
-  function renderInsightCards(ws) {
-    const displayArea = document.getElementById("display-area");
-    // Hardcoded high-level insight values for the 2021 Pappireddipatti context 
-    displayArea.innerHTML = `
-      <div class="insight-grid">
-        <div class="card">
-          <h3>Total Booths Analyzed</h3>
-          <div class="stat">314</div>
-          <p>Complete Constituency Coverage</p>
-        </div>
-        <div class="card" style="border-top-color: var(--aiadmk-green)">
-          <h3>AIADMK Leading Booths</h3>
-          <div class="stat">210 <span class="percent">(66.8%)</span></div>
-          <p>Strongholds and Moderate Leads</p>
-        </div>
-        <div class="card" style="border-top-color: var(--dmk-red)">
-          <h3>DMK Leading Booths</h3>
-          <div class="stat">104 <span class="percent">(33.1%)</span></div>
-          <p>Critical Target Areas</p>
-        </div>
-      </div>
-      <div style="max-width: 600px; margin: auto; padding: 20px;">
-        <canvas id="voteShareChart"></canvas>
-      </div>
-    `;
-    
-    new Chart(document.getElementById('voteShareChart'), {
-      type: 'doughnut',
-      data: {
-        labels: ['AIADMK', 'DMK', 'Others'],
-        datasets: [{ data: [113397, 75831, 27207], backgroundColor: ['#008444', '#ed1c24', '#64748b'] }]
-      },
-      options: { plugins: { title: { display: true, text: 'Constituency Vote Share %' } } }
-    });
-  }
-
-  function styleTableTags() {
-    const cells = document.querySelectorAll("td");
-    cells.forEach(cell => {
-      if (cell.innerText === "AIADMK") cell.innerHTML = '<span class="win-tag win-AIADMK">AIADMK</span>';
-      if (cell.innerText === "DMK") cell.innerHTML = '<span class="win-tag win-DMK">DMK</span>';
-    });
+    html += "</tbody></table>";
+    displayArea.innerHTML = html;
     const table = document.querySelector("table");
     if(table) table.id = "mainTable";
   }
-
   function searchTable() {
     const query = document.getElementById("searchBox").value.toLowerCase();
     const rows = document.querySelectorAll("#mainTable tr");
